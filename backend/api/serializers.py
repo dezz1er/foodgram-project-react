@@ -5,10 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import Q
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.constants import (MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
-                               MIN_AMOUNT_INGREDIENT, MIN_COOKING_TIME)
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
 from rest_framework import serializers
@@ -16,7 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from users.models import Subscription
 
-from .validators import validate_number, validate_unique_for_list
+from .validators import validate_unique_for_list
 
 User = get_user_model()
 
@@ -66,8 +63,9 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), source='ingredient')
-    name = serializers.SerializerMethodField()
-    measurement_unit = serializers.SerializerMethodField()
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientRecipe
@@ -106,15 +104,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
         IngredientRecipe.objects.bulk_create(ingredients)
 
+    @transaction.atomic
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')
         tags = validated_data.pop('tag')
-        with transaction.atomic():
-            recipe = Recipe.objects.create(**validated_data)
-            self._create_ingredients(recipe, ingredients_data)
-            recipe.tag.set(tags)
+        recipe = Recipe.objects.create(**validated_data)
+        self._create_ingredients(recipe, ingredients_data)
+        recipe.tag.set(tags)
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tag', [])
         ingredients_data = validated_data.pop('recipe_ingredients', [])
@@ -125,9 +124,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.image = validated_data.get('image', instance.image)
         instance.save()
         instance.tag.set(tags)
-        with transaction.atomic():
-            instance.recipe_ingredients.all().delete()
-            self._create_ingredients(instance, ingredients_data)
+        instance.recipe_ingredients.all().delete()
+        self._create_ingredients(instance, ingredients_data)
         return instance
 
     def validate(self, attrs):
@@ -136,8 +134,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         name = attrs['name']
         ingredients = attrs['recipe_ingredients']
         ingredients_obj = [ingred['ingredient'] for ingred in ingredients]
-        ingredients_amount = [ingred['amount'] for ingred in ingredients]
-        cooking_time = attrs['cooking_time']
         author = self.context['request'].user
         method = self.context['request'].method
 
@@ -156,14 +152,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         validate_unique_for_list('Теги', tags)
         validate_unique_for_list('Ингредиенты', ingredients_obj)
-        validate_number(
-            'Время приготовления',
-            cooking_time, MAX_COOKING_TIME, MIN_COOKING_TIME)
-
-        for amount in ingredients_amount:
-            validate_number(
-                'Количество',
-                amount, MAX_AMOUNT_INGREDIENT, MIN_AMOUNT_INGREDIENT)
 
         return attrs
 
@@ -196,8 +184,7 @@ class BaseAddRecipeSerializer(serializers.ModelSerializer):
         model = self.Meta.model
         user = self.context['request'].user
         recipe_id = self.context['recipe_id']
-        if model.objects.filter(
-                Q(user=user) & Q(recipe=recipe_id)).exists():
+        if model.objects.filter(user=user, recipe=recipe_id).exists():
             raise ValidationError(
                 f'Вы уже добавили этот рецепт в {model._meta.verbose_name}.')
         return super().validate(attrs)
@@ -280,8 +267,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         user = self.context['user']
         author = self.context['author']
 
-        if Subscription.objects.filter(
-                Q(user=user) & Q(author=author)).exists():
+        if Subscription.objects.filter(user=user, author=author).exists():
             raise ValidationError(
                 f'Вы уже подписывались на пользователя {author.username}.')
 

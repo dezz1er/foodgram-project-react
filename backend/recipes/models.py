@@ -17,13 +17,11 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         max_length=CHARS_MAX_LEN,
-        blank=False,
         db_index=True,
         verbose_name='Название'
     )
     measurement_unit = models.CharField(
         max_length=MEASUREMENT_UNIT_MAX_LEN,
-        blank=False,
         verbose_name='Единица измерения'
     )
 
@@ -46,20 +44,17 @@ class Tag(models.Model):
 
     name = models.CharField(
         max_length=CHARS_MAX_LEN,
-        blank=False,
         unique=True,
         db_index=True,
         verbose_name='Название'
     )
     color = models.CharField(
-        blank=False,
         validators=[validate_hex_color],
         max_length=HEX_COLOR_MAX_LEN,
         verbose_name='Цвет(HEX)'
     )
     slug = models.SlugField(
         max_length=CHARS_MAX_LEN,
-        blank=False,
         unique=True,
         verbose_name='Слаг'
     )
@@ -77,29 +72,26 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
-        db_index=True,
         related_name='recipes',
         verbose_name='Автор'
     )
     name = models.CharField(
         max_length=RECIPE_NAME_MAX_LEN,
-        blank=False,
         verbose_name='Название'
     )
     text = models.TextField(
         max_length=RECIPE_TEXT_MAX_LEN,
-        blank=False,
         verbose_name='Описание'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MaxValueValidator(MAX_COOKING_TIME),
-                    MinValueValidator(MIN_COOKING_TIME)],
-        blank=False,
+        validators=[MaxValueValidator(MAX_COOKING_TIME, "Максимальное ",
+                                      "время - 1000 минут"),
+                    MinValueValidator(MIN_COOKING_TIME, "Минимальное ",
+                                      "время - 1 минута")],
         verbose_name='Время приготовления (минуты)'
     )
     image = models.ImageField(
         upload_to='recipes/images/',
-        blank=False,
         verbose_name='Фото'
     )
     tag = models.ManyToManyField(
@@ -107,13 +99,11 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Теги',
         db_index=True,
-        blank=False,
     )
     ingredient = models.ManyToManyField(
         to=Ingredient,
         related_name='recipes',
         verbose_name='Ингредиенты',
-        blank=False,
         through='IngredientRecipe'
     )
     pub_date = models.DateTimeField(
@@ -145,9 +135,10 @@ class IngredientRecipe(models.Model):
         verbose_name='Рецепт'
     )
     amount = models.PositiveIntegerField(
-        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT),
-                    MinValueValidator(MIN_AMOUNT_INGREDIENT)],
-        blank=False,
+        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT, "Максимальное ",
+                                      "количество - 3000"),
+                    MinValueValidator(MIN_AMOUNT_INGREDIENT, "Минимальное "
+                                      "количество - 1")],
         verbose_name='Количество'
     )
 

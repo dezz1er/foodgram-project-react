@@ -61,3 +61,10 @@ docker compose exec backend python manage.py createsuperuser
 - Gunicorn
 - Django (backend)
 - React (frontend)
+
+### Домен сайта
+https://dezz1erfoodgram.ddns.net/
+
+### Админка 
+Никнейм: y
+Пароль: y
