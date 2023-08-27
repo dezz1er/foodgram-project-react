@@ -135,10 +135,10 @@ class IngredientRecipe(models.Model):
         verbose_name='Рецепт'
     )
     amount = models.PositiveIntegerField(
-        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT, "Максимальное ",
-                                      "количество - 3000"),
-                    MinValueValidator(MIN_AMOUNT_INGREDIENT, "Минимальное "
-                                      "количество - 1")],
+        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT,
+                                      "Максимальноe количество - 3000"),
+                    MinValueValidator(MIN_AMOUNT_INGREDIENT,
+                                      "Минимальное количество - 1")],
         verbose_name='Количество'
     )
 
