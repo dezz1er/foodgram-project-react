@@ -37,7 +37,7 @@
 
 - Клонирование удаленного репозитория
 ```bash
-git clone git@github.com:v-2841/foodgram-project-react.git
+git clone git@github.com:dezz1er/foodgram-project-react.git
 ```
 - В основной директории создайте файл .env, с переменными окружения, используя образец [.env.example](/.env.example)
 - Сборка и развертывание контейнеров
