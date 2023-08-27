@@ -66,5 +66,5 @@ docker compose exec backend python manage.py createsuperuser
 https://dezz1erfoodgram.ddns.net/
 
 ### Админка 
-Никнейм: y
-Пароль: y
+- Никнейм: y
+- Пароль: y
