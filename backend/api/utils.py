@@ -1,5 +1,4 @@
 from django.db.models import Sum
-
 from recipes.models import IngredientRecipe
 
 

@@ -3,7 +3,7 @@ from django.db.models import Exists, OuterRef
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (BuyList, Favorite, Ingredient, Recipe, Tag)
+from recipes.models import BuyList, Favorite, Ingredient, Recipe, Tag
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
