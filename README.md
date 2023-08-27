@@ -55,7 +55,7 @@ docker compose exec backend python manage.py createsuperuser
 ### Стек технологий:
 - Docker
 - Postgres
-- Python 3.x
+- Python 3.11
 - Node.js 9.x.x
 - Nginx
 - Gunicorn
