@@ -84,10 +84,10 @@ class Recipe(models.Model):
         verbose_name='Описание'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MaxValueValidator(MAX_COOKING_TIME, "Максимальное ",
-                                      "время - 1000 минут"),
-                    MinValueValidator(MIN_COOKING_TIME, "Минимальное ",
-                                      "время - 1 минута")],
+        validators=[MaxValueValidator(MAX_COOKING_TIME,
+                                      "Максимальное время - 1000 минут"),
+                    MinValueValidator(MIN_COOKING_TIME,
+                                      "Минимальное время - 1 минута")],
         verbose_name='Время приготовления (минуты)'
     )
     image = models.ImageField(
